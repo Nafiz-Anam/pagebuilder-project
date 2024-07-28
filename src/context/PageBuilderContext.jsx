@@ -4,11 +4,11 @@ export const PageBuilderContext = createContext();
 
 const PageBuilderProvider = ({ children }) => {
   const [activeDevice, setActiveDevice] = useState("desktop");
-  const [width, setWidth] = useState("960px");
+  const [zoomLevel, setZoomLevel] = useState("100%");
 
   return (
     <PageBuilderContext.Provider
-      value={{ activeDevice, setActiveDevice, width, setWidth }}
+      value={{ activeDevice, setActiveDevice, zoomLevel, setZoomLevel }}
     >
       {children}
     </PageBuilderContext.Provider>
