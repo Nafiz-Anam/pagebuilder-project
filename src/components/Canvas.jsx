@@ -1,6 +1,5 @@
-import { useContext } from "react";
-import BarsIcon from "../icons/bars.svg?component";
-import PencilIcon from "../icons/pencil.svg?component";
+import React, { useContext } from "react";
+import { useDrop } from "react-dnd";
 import { PageBuilderContext } from "../context/PageBuilderContext";
 
 const deviceStyles = {
@@ -11,7 +10,22 @@ const deviceStyles = {
 };
 
 const Canvas = ({ isPreview }) => {
-  const { activeDevice, zoomLevel } = useContext(PageBuilderContext);
+  const {
+    activeDevice,
+    zoomLevel,
+    elements,
+    addElementToCanvas,
+    updateElementContent,
+  } = useContext(PageBuilderContext);
+
+  const [{ isOver }, drop] = useDrop(() => ({
+    accept: ["container", "text"],
+    drop: (item) => addElementToCanvas(item.type),
+    collect: (monitor) => ({
+      isOver: monitor.isOver(),
+    }),
+  }));
+
   const scale = parseInt(zoomLevel) / 100;
   const style = {
     ...deviceStyles[activeDevice],
@@ -19,103 +33,49 @@ const Canvas = ({ isPreview }) => {
     transformOrigin: "top center",
     margin: "0 auto",
     height: `${100 / scale}%`,
+    background: isOver ? "rgba(255, 255, 255, 0.7)" : "#f0f0f0", // Light overlay when dragging
   };
 
   return (
-    <main className={`flex-1 overflow-y-scroll ${!isPreview && "px-12"}`}>
-      <div style={{ display: "flex", justifyContent: "center" }}>
-        <div style={{ ...style, padding: isPreview ? "0" : "3rem 0" }}>
-          <div className="bg-white">
-            <nav className="flex items-center justify-between px-12 py-6">
-              <img className="h-11 w-11" src="/img/logo.png" alt="Logo" />
-              <div className="flex gap-x-6">
-                <button className="rounded-full bg-blue-600 px-8 py-3 text-white">
-                  Hire Us
-                </button>
-                <button className="p-2">
-                  <svg className="h-6 w-6 stroke-current">
-                    {/* Bars icon SVG path */}
-                  </svg>
-                </button>
-              </div>
-            </nav>
-            <section className="py-16">
-              <div className="px-12">
-                <div className="group relative">
-                  <div className="pointer-events-none absolute inset-0 hidden border-2 border-blue-600 group-focus-within:block">
-                    <div className="absolute -translate-y-full pl-2">
-                      <div className="flex items-center gap-x-2 rounded-t-lg bg-blue-600 px-3 py-1 text-white">
-                        <span className="text-sm">H1 - hero title</span>
-                        <svg className="h-4 w-4 fill-current">
-                          {/* Pencil icon SVG path */}
-                        </svg>
-                      </div>
-                    </div>
-                    <div className="absolute left-0 top-0 h-2 w-2 -translate-x-full -translate-y-full border-2 border-blue-600"></div>
-                    <div className="absolute right-0 top-0 h-2 w-2 -translate-y-full translate-x-full border-2 border-blue-600"></div>
-                    <div className="absolute bottom-0 right-0 h-2 w-2 translate-x-full translate-y-full border-2 border-blue-600"></div>
-                    <div className="absolute bottom-0 left-0 h-2 w-2 -translate-x-full translate-y-full border-2 border-blue-600"></div>
-                    <div className="absolute inset-x-0 top-0 flex -translate-y-1/2 items-center justify-center">
-                      <div className="h-2 w-2 border-2 border-blue-600 bg-white"></div>
-                    </div>
-                    <div className="absolute inset-x-0 bottom-0 flex translate-y-1/2 items-center justify-center">
-                      <div className="h-2 w-2 border-2 border-blue-600 bg-white"></div>
-                    </div>
-                  </div>
-                  <h1
-                    className="max-w-3xl text-5xl font-bold leading-[1.4] focus:outline-none"
-                    contentEditable
-                  >
-                    We craft digital products for business and user goals.
-                  </h1>
-                </div>
-                <p className="mt-4 text-lg leading-loose text-gray-400">
-                  Help find solutions with UI / UX designs that are intuitive
-                  and in accordance with client business goals. We provide a
-                  high-quality service in UI/ UX Design & Development.
-                </p>
-              </div>
-              <div className="flex items-center gap-4 px-12 pt-8">
-                <button className="rounded-full bg-blue-600 px-8 py-5 font-semibold text-white">
-                  Let's work together
-                </button>
-                <button className="rounded-full border border-gray-200 px-8 py-5 font-semibold text-blue-600">
-                  Check our work
-                </button>
-              </div>
-            </section>
-            <section className="bg-gray-50 py-16">
-              <div className="px-12">
-                <span className="text-sm uppercase text-gray-400">
-                  Our Projects
-                </span>
-                <div className="flex items-center justify-between">
-                  <h2 className="max-w-3xl text-4xl font-bold leading-[1.4]">
-                    Our latest cool projects.
-                  </h2>
-                  <button className="rounded-full bg-white px-8 py-5 font-semibold text-blue-600">
-                    Check our work
-                  </button>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-8 px-12 pt-8">
-                <div className="flex aspect-square w-full items-center overflow-hidden bg-gray-100">
-                  <img
-                    className="h-full w-full object-cover"
-                    src="/img/billy.png"
-                    alt="Project Billy"
-                  />
-                </div>
-                <div className="flex aspect-square w-full items-center overflow-hidden bg-gray-100">
-                  <img
-                    className="h-full w-full object-cover"
-                    src="/img/alpha-pay.png"
-                    alt="Project Alpha Pay"
-                  />
-                </div>
-              </div>
-            </section>
-          </div>
+    <main className={`flex-1 overflow-y-auto ${!isPreview && "p-12"}`}>
+      <div
+        ref={drop}
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          position: "relative",
+          width: "100%",
+          minHeight: "80vh",
+        }}
+      >
+        <div
+          style={{
+            ...style,
+            padding: isPreview ? "0" : "3rem 0",
+            position: "relative",
+            width: "100%",
+            border: isOver ? "2px dashed #4A90E2" : "2px dashed #d3d3d3", // Modern dashed border
+            transition: "border 0.2s ease, background 0.2s ease", // Smooth transitions
+          }}
+        >
+          {elements.map((element) => (
+            <div
+              key={element.id}
+              className="m-2 rounded border bg-white p-4 shadow"
+            >
+              {element.type === "container" && <div>Container</div>}
+              {element.type === "text" && (
+                <input
+                  type="text"
+                  value={element.content}
+                  onChange={(e) =>
+                    updateElementContent(element.id, e.target.value)
+                  }
+                  className="w-full border-none outline-none"
+                />
+              )}
+            </div>
+          ))}
         </div>
       </div>
     </main>
