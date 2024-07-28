@@ -6,6 +6,7 @@ import Canvas from "../Canvas";
 
 const Layout = () => {
   const [isPreview, setIsPreview] = useState(false);
+  const [rightSidebarView, setRightSidebarView] = useState("layers");
 
   const handlePreview = () => {
     setIsPreview(!isPreview);
@@ -17,12 +18,12 @@ const Layout = () => {
         isPreview ? "h-screen overflow-hidden" : ""
       }`}
     >
-      {!isPreview && <Sidebar />}
+      {!isPreview && <Sidebar setRightSidebarView={setRightSidebarView} />}
       <div className="flex h-screen flex-1 flex-col">
         {!isPreview && <Header onPreview={handlePreview} />}
         <Canvas isPreview={isPreview} />
       </div>
-      {!isPreview && <RightSidebar />}
+      {!isPreview && <RightSidebar view={rightSidebarView} />}
       {isPreview && (
         <button
           className="fixed bottom-4 right-4 rounded-full bg-blue-600 px-4 py-2 text-white"
