@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import LogoIcon from "../icons/logo.svg?component";
 import SquarePlusIcon from "../icons/square-plus.svg?component";
 import LayoutIcon from "../icons/layout.svg?component";
@@ -8,23 +8,25 @@ import ImageIcon from "../icons/image.svg?component";
 import AlertCircleIcon from "../icons/alert-circle.svg?component";
 import SettingsIcon from "../icons/settings.svg?component";
 import Tooltip from "./Tooltip";
+import { PageBuilderContext } from "../context/PageBuilderContext";
 
-const Sidebar = ({ setRightSidebarView }) => {
-  const [activeItem, setActiveItem] = useState(null);
+const Sidebar = () => {
+  const { setRightSidebarView, activeSidebarItem, setActiveSidebarItem } =
+    useContext(PageBuilderContext);
 
   const handleMenuClick = (item) => {
-    if (activeItem === item) {
-      setActiveItem(null);
+    if (activeSidebarItem === item) {
+      setActiveSidebarItem(null);
       setRightSidebarView("layers");
     } else {
-      setActiveItem(item);
-      setRightSidebarView(item === "add-elements" ? "elements" : "layers");
+      setActiveSidebarItem(item);
+      setRightSidebarView(item);
     }
   };
 
   const menuItems = [
     {
-      id: "add-elements",
+      id: "elements",
       icon: <SquarePlusIcon className="h-6 w-6 stroke-current" />,
       tooltip: "Add elements (A)",
     },
@@ -74,7 +76,7 @@ const Sidebar = ({ setRightSidebarView }) => {
             key={item.id}
             href="#"
             className={`group relative rounded-xl p-2 ${
-              activeItem === item.id
+              activeSidebarItem === item.id
                 ? "bg-gray-100 text-blue-600"
                 : "text-gray-400 hover:bg-gray-100"
             }`}
@@ -90,7 +92,7 @@ const Sidebar = ({ setRightSidebarView }) => {
           <button
             key={item.id}
             className={`group relative rounded-xl p-2 ${
-              activeItem === item.id
+              activeSidebarItem === item.id
                 ? "bg-gray-100 text-blue-600"
                 : "text-gray-400 hover:bg-gray-100"
             }`}

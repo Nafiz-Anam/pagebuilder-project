@@ -10,8 +10,28 @@ import PositionSettings from "./settings/PositionSettings";
 import BorderSettings from "./settings/BorderSettings";
 import BackgroundSettings from "./settings/BackgroundSettings";
 import ElementsPanel from "./ElementsPanel";
+import { useContext } from "react";
+import { PageBuilderContext } from "../context/PageBuilderContext";
+import StyleSettings from "./elements/StyleSettings";
+import ContainerSettings from "./ContainerSettings";
+import TextSettings from "./TextSettings";
 
-const RightSidebar = ({ view }) => {
+const RightSidebar = () => {
+  const { rightSidebarView, selectedElement } = useContext(PageBuilderContext);
+
+  const getElementSettings = (element) => {
+    if (!element) return null;
+
+    switch (element.type) {
+      case "container":
+        return <ContainerSettings element={element} />;
+      case "text":
+        return <TextSettings element={element} />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <aside className="flex h-screen w-[300px] flex-col border-l border-gray-200 bg-white">
       <div className="flex h-18 items-center gap-x-4 border-b border-gray-200 px-6">
@@ -23,8 +43,11 @@ const RightSidebar = ({ view }) => {
           Publish
         </button>
       </div>
-      {view === "elements" && <ElementsPanel />}
-      {view === "layers" && (
+      {rightSidebarView === "elements" ? (
+        <ElementsPanel />
+      ) : rightSidebarView === "settings" ? (
+        getElementSettings(selectedElement)
+      ) : (
         <div className="flex flex-1 flex-col overflow-y-scroll">
           <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
             <span className="text-sm font-semibold">Selector</span>

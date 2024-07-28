@@ -1,6 +1,8 @@
 import React, { useContext } from "react";
 import { useDrop } from "react-dnd";
 import { PageBuilderContext } from "../context/PageBuilderContext";
+import ContainerElement from "./elements/ContainerElement";
+import TextElement from "./elements/TextElement";
 
 const deviceStyles = {
   desktop: { maxWidth: "100%" },
@@ -16,6 +18,8 @@ const Canvas = ({ isPreview }) => {
     elements,
     addElementToCanvas,
     updateElementContent,
+    updateElementStyle,
+    setSelectedElement,
   } = useContext(PageBuilderContext);
 
   const [{ isOver }, drop] = useDrop(() => ({
@@ -25,6 +29,39 @@ const Canvas = ({ isPreview }) => {
       isOver: monitor.isOver(),
     }),
   }));
+
+  const renderElement = (element) => {
+    switch (element.type) {
+      case "container":
+        return (
+          <ContainerElement
+            key={element.id}
+            id={element.id}
+            style={element.style}
+          >
+            {element.children &&
+              element.children.map((child) => renderElement(child))}
+          </ContainerElement>
+        );
+      case "text":
+        return (
+          <div
+            key={element.id}
+            className="m-2 rounded border bg-white p-4 shadow"
+            onClick={() => setSelectedElement(element)}
+          >
+            <input
+              type="text"
+              value={element.content}
+              onChange={(e) => updateElementContent(element.id, e.target.value)}
+              className="w-full border-none outline-none"
+            />
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
 
   const scale = parseInt(zoomLevel) / 100;
   const style = {
@@ -37,7 +74,7 @@ const Canvas = ({ isPreview }) => {
   };
 
   return (
-    <main className={`flex-1 overflow-y-auto ${!isPreview && "p-12"}`}>
+    <main className={`flex-1 overflow-y-scroll ${!isPreview && "p-12"}`}>
       <div
         ref={drop}
         style={{
@@ -58,24 +95,7 @@ const Canvas = ({ isPreview }) => {
             transition: "border 0.2s ease, background 0.2s ease", // Smooth transitions
           }}
         >
-          {elements.map((element) => (
-            <div
-              key={element.id}
-              className="m-2 rounded border bg-white p-4 shadow"
-            >
-              {element.type === "container" && <div>Container</div>}
-              {element.type === "text" && (
-                <input
-                  type="text"
-                  value={element.content}
-                  onChange={(e) =>
-                    updateElementContent(element.id, e.target.value)
-                  }
-                  className="w-full border-none outline-none"
-                />
-              )}
-            </div>
-          ))}
+          {elements.map((element) => renderElement(element))}
         </div>
       </div>
     </main>
